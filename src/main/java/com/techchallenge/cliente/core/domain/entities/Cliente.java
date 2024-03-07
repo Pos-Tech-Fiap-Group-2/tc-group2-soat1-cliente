@@ -2,10 +2,9 @@ package com.techchallenge.cliente.core.domain.entities;
 
 public class Cliente {
 
-	private Long id;
     private String nome;
     private String email;
-    private Long cpf;
+    private Pedido pedido;
 
     public String getNome() {
         return nome;
@@ -23,19 +22,16 @@ public class Cliente {
         this.email = email;
     }
 
-    public Long getCpf() {
-        return cpf;
-    }
-
-    public void setCpf(Long cpf) {
-        this.cpf = cpf;
-    }
-
-	public Long getId() {
-		return id;
+	public Pedido getPedido() {
+		return pedido;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
+	public void setPedido(Pedido pedido) {
+		this.pedido = pedido;
+	}
+
+	@Override
+	public String toString() {
+		return "Cliente [nome=" + nome + ", email=" + email + ", pedido=" + pedido + "]";
 	}
 }
