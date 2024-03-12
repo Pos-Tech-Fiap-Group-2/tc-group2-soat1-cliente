@@ -1,0 +1,1 @@
+Olá ${mensagem.cliente.nome}, seu pedido de ID ${mensagem.cliente.pedido.id} está pronto!
