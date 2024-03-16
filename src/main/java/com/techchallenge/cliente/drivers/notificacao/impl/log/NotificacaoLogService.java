@@ -1,5 +1,7 @@
 package com.techchallenge.cliente.drivers.notificacao.impl.log;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,9 +15,11 @@ public class NotificacaoLogService extends NotificacaoBaseService<Mensagem, Stri
 	@Autowired
 	private TemplateLog processador;
 	
+	private Logger logger = LoggerFactory.getLogger(NotificacaoLogService.class);
+	
 	@Override
 	protected void enviarNotificacao(String value) {
-		System.out.println(value);
+		logger.info(String.format("Notificação cliente: %s", new Object[] {value}));
 	}
 
 	@Override
