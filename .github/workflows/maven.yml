@@ -1,0 +1,86 @@
+name: Java CI with Maven
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+env:
+  aws-region: us-east-1
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Cache the Maven
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-ms
+    - name: Build and Test Project
+      run: mvn -B package --file pom.xml
+
+  build:
+    needs: [tests]
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - name: build
+      run: mvn -B package --file pom.xml -DskipTests
+    - name: upload jar
+      run: mkdir staging && cp target/*tc-challenge-group2-soat1-cliente.jar staging
+    - uses: actions/upload-artifact@v1
+      with:
+        name: Package
+        path: staging
+
+  deploy:
+    needs: [build]
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+        aws-region: ${{ env.aws-region }}
+
+    - name: Task definition
+      id: read-task-definition
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: task-definition.json
+        container-name: tech-challenge-api-cliente
+        image: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.aws-region }}.amazonaws.com/tech-challenge-ecr:tc-api-cliente
+        environment-variables: "LOG_LEVEL=info"
+
+    - name: Deploy to Amazon ECS service
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: ${{ steps.read-task-definition.outputs.task-definition }}
+        service: tc-cliente-sv
+        cluster: tech-challenge-cluster
+        wait-for-service-stability: true
+  
