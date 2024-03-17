@@ -29,8 +29,7 @@ public abstract class TemplateBase<T> {
 	
 	@PostConstruct
 	private void init() throws IOException, URISyntaxException {
-		URL url = this.getClass().getResource(getBasePath());
-		freemarkerConfig.setDirectoryForTemplateLoading(new File(url.toURI()));
+		freemarkerConfig.setClassForTemplateLoading(this.getClass(), getBasePath());
 	}
 	
 	public String processarTemplate(T value) {
